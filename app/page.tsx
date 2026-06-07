@@ -138,7 +138,7 @@ export default function Home() {
 
   return (
     // Slow connection accent: text-[#f87171] — apply to speed number and verdict card when speed is below threshold
-    <main className="flex-1 min-h-screen bg-[#0d0d0d] flex flex-col items-center justify-between px-4 py-10">
+    <main className="flex-1 min-h-screen bg-[#0d0d0d] flex flex-col items-center justify-center px-4 py-10">
 
       {/* Hero section — centered */}
       <div className="flex-1 flex flex-col items-center justify-center gap-6 w-full max-w-md">
@@ -177,34 +177,33 @@ export default function Home() {
           </span>
         </div>
 
-        {/* Verdict card */}
-        <div className="w-full rounded-2xl bg-[#1a1a1a] border border-[#2a2a2a] px-6 py-5 text-center shadow-xl">
-          {verdictLoading ? (
-            <p className="text-sm text-slate-500 font-light animate-pulse">
-              Analyse en cours…
-            </p>
-          ) : verdict !== null ? (
-            <p className={`text-sm text-neutral-300 font-light leading-relaxed transition-opacity duration-700 ${verdictVisible ? 'opacity-100' : 'opacity-0'}`}>
-              {verdict}
-            </p>
-          ) : (
-            <p className="text-sm text-slate-500 font-light">
-              Verdict will appear here.
-            </p>
-          )}
+        {/* Verdict card + VPN CTA — grouped as a tight pair */}
+        <div className="flex flex-col items-center gap-3 w-full">
+          <div className="w-full rounded-2xl bg-[#1a1a1a] border border-[#2a2a2a] px-6 py-5 text-center shadow-xl">
+            {verdictLoading ? (
+              <p className="text-sm text-slate-500 font-light animate-pulse">
+                Analyse en cours…
+              </p>
+            ) : verdict !== null ? (
+              <p className={`text-sm text-neutral-300 font-light leading-relaxed transition-opacity duration-700 ${verdictVisible ? 'opacity-100' : 'opacity-0'}`}>
+                {verdict}
+              </p>
+            ) : (
+              <p className="text-sm text-slate-500 font-light">
+                Verdict will appear here.
+              </p>
+            )}
+          </div>
+
+          {/* TODO: replace with NordVPN affiliate URL when provided */}
+          <a
+            href="#"
+            className="px-8 py-2.5 rounded-full bg-[#22c55e] hover:bg-[#16a34a] active:bg-[#15803d] text-black text-sm font-medium transition-colors"
+          >
+            Protect your connection
+          </a>
         </div>
 
-      </div>
-
-      {/* VPN affiliate CTA */}
-      <div className="pt-8">
-        {/* TODO: replace with NordVPN affiliate URL when provided */}
-        <a
-          href="#"
-          className="px-8 py-2.5 rounded-full bg-[#22c55e] hover:bg-[#16a34a] active:bg-[#15803d] text-black text-sm font-medium transition-colors"
-        >
-          Protect your connection
-        </a>
       </div>
 
     </main>

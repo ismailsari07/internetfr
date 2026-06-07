@@ -126,13 +126,10 @@ export default function Home() {
       .then((res) => res.json())
       .then((data: LookupData) => {
         clearTimeout(timeout);
-        console.log('[lookup] client ok:', data); // DEBUG
         if (!cancelled) setLookup(data);
       })
-      .catch((err: unknown) => {
+      .catch(() => {
         clearTimeout(timeout);
-        const name = err instanceof Error ? err.name : 'unknown';
-        console.log('[lookup] client error:', name); // DEBUG — AbortError = 5s timeout fired
         if (!cancelled) setLookup({ ip: null, isp: null, city: null, country: null });
       });
 

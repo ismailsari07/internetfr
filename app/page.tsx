@@ -196,27 +196,15 @@ export default function Home() {
 
       </div>
 
-      {/* Bottom chrome — ads + VPN CTA */}
-      <div className="w-full max-w-md flex flex-col items-center gap-3 pt-6">
-
-        {/* VPN affiliate CTA */}
+      {/* VPN affiliate CTA */}
+      <div className="pt-8">
+        {/* TODO: replace with NordVPN affiliate URL when provided */}
         <a
           href="#"
-          className="w-full sm:w-auto px-8 py-2.5 rounded-full bg-[#22c55e] hover:bg-[#16a34a] active:bg-[#15803d] text-black text-sm font-medium transition-colors text-center"
+          className="px-8 py-2.5 rounded-full bg-[#22c55e] hover:bg-[#16a34a] active:bg-[#15803d] text-black text-sm font-medium transition-colors"
         >
           Protect your connection
         </a>
-
-        {/* Ad slots */}
-        <div className="w-full flex flex-col sm:flex-row gap-2">
-          <div className="flex-1 h-14 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center">
-            <span className="text-xs text-neutral-600 uppercase tracking-widest">Ad slot</span>
-          </div>
-          <div className="flex-1 h-14 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center">
-            <span className="text-xs text-neutral-600 uppercase tracking-widest">Ad slot</span>
-          </div>
-        </div>
-
       </div>
 
     </main>

@@ -7,8 +7,8 @@ export async function GET(request: Request) {
   const clientIp = forwarded ? forwarded.split(',')[0].trim() : (realIp ?? null);
 
   const apiUrl = clientIp
-    ? `https://ipapi.co/${clientIp}/json/`
-    : 'https://ipapi.co/json/';
+    ? `https://ipwho.is/${clientIp}`
+    : 'https://ipwho.is/';
 
   console.log('[lookup] clientIp:', clientIp ?? '(none)', '| apiUrl:', apiUrl); // DEBUG
 
@@ -20,16 +20,16 @@ export async function GET(request: Request) {
     clearTimeout(timeout);
 
     const rawText = await res.text();
-    console.log('[lookup] ipapi.co status:', res.status, '| body:', rawText); // DEBUG
+    console.log('[lookup] ipwho.is status:', res.status, '| body:', rawText); // DEBUG
 
     const data = JSON.parse(rawText);
-    if (!res.ok) throw new Error(`ipapi.co ${res.status}`);
+    if (!res.ok || data.success === false) throw new Error('ipwho.is lookup failed');
 
     return Response.json({
-      ip:      (data.ip         as string | undefined) ?? null,
-      isp:     (data.org        as string | undefined) ?? null, // "AS13335 Cloudflare, Inc."
-      city:    (data.city       as string | undefined) ?? null,
-      country: (data.country_name as string | undefined) ?? null,
+      ip:      (data.ip                                          as string | undefined) ?? null,
+      isp:     (data.connection?.isp ?? data.connection?.org    as string | undefined) ?? null,
+      city:    (data.city                                        as string | undefined) ?? null,
+      country: (data.country                                     as string | undefined) ?? null,
     });
   } catch {
     clearTimeout(timeout);

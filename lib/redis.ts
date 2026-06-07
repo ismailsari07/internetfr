@@ -1,4 +1,4 @@
-const REDIS_URL   = process.env.UPSTASH_REDIS_REST_REDIS_URL;
+const REDIS_URL   = process.env.UPSTASH_REDIS_REST_URL;
 const TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
 async function cmd(...args: (string | number)[]): Promise<unknown> {

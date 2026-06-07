@@ -22,7 +22,11 @@ export default function Home() {
   const [finalDownloadMbps, setFinalDownloadMbps] = useState<number | null>(null); // used by later phases
   const [status, setStatus] = useState<Status>('running');
   const [lookup, setLookup] = useState<LookupData | null>(null); // null = still loading
+  const [verdict, setVerdict] = useState<string | null>(null);
+  const [verdictLoading, setVerdictLoading] = useState(false);
+  const [verdictVisible, setVerdictVisible] = useState(false);
   const isFinished = useRef(false);
+  const verdictFetched = useRef(false);
 
   useEffect(() => {
     /* FULL ACCURACY CONFIG — uncomment and remove FAST CONFIG below to restore the
@@ -71,8 +75,8 @@ export default function Home() {
     engine.onFinish = (results) => {
       isFinished.current = true;
       const bps = results.getDownloadBandwidth();
-      const mbps = bps !== undefined ? bps / 1e6 : null;
-      setFinalDownloadMbps(mbps);
+      // Use 0 when no reading — maps to tres_lent tier so verdict still fires
+      setFinalDownloadMbps(bps !== undefined ? bps / 1e6 : 0);
       setDisplaySpeed(bps !== undefined ? formatMbps(bps) : '—');
       setStatus('done');
     };
@@ -82,23 +86,54 @@ export default function Home() {
     return () => { engine.pause(); };
   }, []);
 
-  void finalDownloadMbps; // used by later phases
+  // Trigger verdict once speed test AND lookup have both resolved
+  useEffect(() => {
+    if (status !== 'done' || finalDownloadMbps === null || lookup === null) return;
+    if (verdictFetched.current) return;
+    verdictFetched.current = true;
+
+    setVerdictLoading(true);
+
+    fetch('/api/verdict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        speed: Math.round(finalDownloadMbps),
+        isp: lookup.isp,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data: { verdict: string }) => {
+        setVerdict(data.verdict);
+        setVerdictLoading(false);
+        // Tiny delay so opacity-0 is painted before the transition fires
+        setTimeout(() => setVerdictVisible(true), 50);
+      })
+      .catch(() => {
+        setVerdict("Votre connexion a bien été testée. Pour naviguer en toute sécurité, pensez à utiliser un VPN afin de masquer votre adresse IP des regards indiscrets.");
+        setVerdictLoading(false);
+        setTimeout(() => setVerdictVisible(true), 50);
+      });
+  }, [status, finalDownloadMbps, lookup]);
 
   // Fetch IP / ISP / location independently of the speed test
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5_000);
 
-    fetch('/api/lookup')
+    fetch('/api/lookup', { signal: controller.signal })
       .then((res) => res.json())
       .then((data: LookupData) => {
-        console.log('[lookup] client received:', data); // DEBUG
+        clearTimeout(timeout);
         if (!cancelled) setLookup(data);
       })
       .catch(() => {
+        clearTimeout(timeout);
         if (!cancelled) setLookup({ ip: null, isp: null, city: null, country: null });
       });
 
-    return () => { cancelled = true; };
+    return () => { cancelled = true; controller.abort(); };
   }, []);
 
   return (
@@ -144,7 +179,19 @@ export default function Home() {
 
         {/* Verdict card */}
         <div className="w-full rounded-2xl bg-[#1a1a1a] border border-[#2a2a2a] px-6 py-5 text-center shadow-xl">
-          <p className="text-sm text-slate-500 font-light">Verdict will appear here.</p>
+          {verdictLoading ? (
+            <p className="text-sm text-slate-500 font-light animate-pulse">
+              Analyse en cours…
+            </p>
+          ) : verdict !== null ? (
+            <p className={`text-sm text-neutral-300 font-light leading-relaxed transition-opacity duration-700 ${verdictVisible ? 'opacity-100' : 'opacity-0'}`}>
+              {verdict}
+            </p>
+          ) : (
+            <p className="text-sm text-slate-500 font-light">
+              Verdict will appear here.
+            </p>
+          )}
         </div>
 
       </div>

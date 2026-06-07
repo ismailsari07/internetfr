@@ -10,9 +10,6 @@ export async function GET(request: Request) {
     ? `https://ipapi.co/${clientIp}/json/`
     : 'https://ipapi.co/json/';
 
-  console.log('[lookup] clientIp:', clientIp ?? '(none — falling back to /json/)'); // DEBUG
-  console.log('[lookup] apiUrl:', apiUrl); // DEBUG
-
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 3000);
 
@@ -21,8 +18,6 @@ export async function GET(request: Request) {
     clearTimeout(timeout);
 
     const data = await res.json();
-    console.log('[lookup] status:', res.status, '| raw body:', data); // DEBUG
-
     if (!res.ok) throw new Error(`ipapi.co ${res.status}`);
 
     return Response.json({

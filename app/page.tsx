@@ -196,7 +196,7 @@ export default function Home() {
           </div>
 
           <a
-            href="https://go.nordvpn.net/aff_c?offer_id=15&aff_id=149873&url_id=1172"
+            href="https://go.nordvpn.net/aff_c?offer_id=15&aff_id=149873&url=https%3A%2F%2Fnordvpn.com%2Fpricing%2F%3Futm_medium%3Daffiliate%26utm_source%3Daff%26utm_term%3Daff%26utm_content%3Daff%26utm_campaign%3Daff15"
             target="_blank"
             rel="noopener noreferrer sponsored"
             className="px-8 py-2.5 rounded-full bg-[#22c55e] hover:bg-[#16a34a] active:bg-[#15803d] text-black text-sm font-medium transition-colors"

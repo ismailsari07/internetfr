@@ -195,9 +195,10 @@ export default function Home() {
             )}
           </div>
 
-          {/* TODO: replace with NordVPN affiliate URL when provided */}
           <a
-            href="#"
+            href="https://go.nordvpn.net/aff_c?offer_id=15&aff_id=149873&url_id=1172"
+            target="_blank"
+            rel="noopener noreferrer sponsored"
             className="px-8 py-2.5 rounded-full bg-[#22c55e] hover:bg-[#16a34a] active:bg-[#15803d] text-black text-sm font-medium transition-colors"
           >
             Protect your connection

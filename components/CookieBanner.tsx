@@ -118,35 +118,40 @@ export default function CookieBanner({ externalSettingsOpen, onExternalSettingsC
             bannerMounted ? 'translate-y-0' : 'translate-y-full'
           }`}
         >
-          <div className="max-w-2xl mx-auto bg-[#1a1a1a] border border-b-0 border-[#2a2a2a] rounded-t-2xl px-6 py-5 shadow-2xl">
-            <h2 className="text-sm font-semibold text-neutral-100 mb-2">
-              Votre vie privée
-            </h2>
-            <p className="text-xs text-neutral-400 font-light leading-relaxed">
-              Nous utilisons des cookies pour assurer le bon fonctionnement de ce site et améliorer votre expérience.
-              Vous pouvez accepter, refuser ou personnaliser vos préférences à tout moment, conformément aux directives de la CNIL.
-            </p>
+          <div className="max-w-2xl mx-auto bg-[#1a1a1a] border border-b-0 border-[#2a2a2a] rounded-t-2xl px-5 py-3 shadow-2xl">
+            {/* Desktop: text left, buttons right. Mobile: stacked. */}
+            <div className="sm:flex sm:items-center sm:gap-6">
+              <div className="flex-1 min-w-0 mb-2 sm:mb-0">
+                <h2 className="text-sm font-semibold text-neutral-100 mb-0.5">
+                  Votre vie privée
+                </h2>
+                <p className="text-xs text-neutral-400 font-light leading-relaxed">
+                  Nous utilisons des cookies pour assurer le bon fonctionnement de ce site et améliorer votre expérience.
+                  Vous pouvez accepter, refuser ou personnaliser vos préférences à tout moment, conformément aux directives de la CNIL.
+                </p>
+              </div>
 
-            {/* CNIL: Accept and Reject are identical in size and prominence */}
-            <div className="flex flex-wrap gap-2 mt-4">
-              <button
-                onClick={acceptAll}
-                className="px-5 py-2 rounded-full border border-neutral-600 text-xs text-neutral-200 hover:border-neutral-400 hover:text-white transition-colors"
-              >
-                Accepter tout
-              </button>
-              <button
-                onClick={rejectAll}
-                className="px-5 py-2 rounded-full border border-neutral-600 text-xs text-neutral-200 hover:border-neutral-400 hover:text-white transition-colors"
-              >
-                Refuser tout
-              </button>
-              <button
-                onClick={openSettings}
-                className="px-5 py-2 rounded-full text-xs text-neutral-500 hover:text-neutral-300 transition-colors"
-              >
-                Personnaliser
-              </button>
+              {/* CNIL: Accept and Reject are identical in size and prominence */}
+              <div className="flex flex-wrap gap-2 flex-shrink-0">
+                <button
+                  onClick={acceptAll}
+                  className="px-5 py-1.5 rounded-full border border-neutral-600 text-xs text-neutral-200 hover:border-neutral-400 hover:text-white transition-colors"
+                >
+                  Accepter tout
+                </button>
+                <button
+                  onClick={rejectAll}
+                  className="px-5 py-1.5 rounded-full border border-neutral-600 text-xs text-neutral-200 hover:border-neutral-400 hover:text-white transition-colors"
+                >
+                  Refuser tout
+                </button>
+                <button
+                  onClick={openSettings}
+                  className="px-5 py-1.5 rounded-full text-xs text-neutral-500 hover:text-neutral-300 transition-colors"
+                >
+                  Personnaliser
+                </button>
+              </div>
             </div>
           </div>
         </div>

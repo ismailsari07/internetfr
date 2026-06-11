@@ -26,14 +26,9 @@ export default function Home() {
   const [finalDownloadMbps, setFinalDownloadMbps] = useState<number | null>(null); // used by later phases
   const [status, setStatus] = useState<Status>('running');
   const [lookup, setLookup] = useState<LookupData | null>(null); // null = still loading
-  const [verdict, setVerdict] = useState<string | null>(null);
-  const [verdictLoading, setVerdictLoading] = useState(false);
-  const [verdictVisible, setVerdictVisible] = useState(false);
-  const [infoOpen, setInfoOpen] = useState(false);
   const [legalOpen, setLegalOpen] = useState(false);
   const [cookieSettingsOpen, setCookieSettingsOpen] = useState(false);
   const isFinished = useRef(false);
-  const verdictFetched = useRef(false);
 
   // Re-runs on each refresh via runKey
   useEffect(() => {
@@ -94,35 +89,32 @@ export default function Home() {
     return () => { engine.pause(); };
   }, [runKey]);
 
-  // Trigger verdict once speed test AND lookup have both resolved
-  useEffect(() => {
-    if (status !== 'done' || finalDownloadMbps === null || lookup === null) return;
-    if (verdictFetched.current) return;
-    verdictFetched.current = true;
-
-    setVerdictLoading(true);
-
-    fetch('/api/verdict', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        speed: Math.round(finalDownloadMbps),
-        isp: lookup.isp,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data: { verdict: string }) => {
-        setVerdict(data.verdict);
-        setVerdictLoading(false);
-        // Tiny delay so opacity-0 is painted before the transition fires
-        setTimeout(() => setVerdictVisible(true), 50);
-      })
-      .catch(() => {
-        setVerdict("Votre connexion a bien été testée. Pour naviguer en toute sécurité, pensez à utiliser un VPN afin de masquer votre adresse IP des regards indiscrets.");
-        setVerdictLoading(false);
-        setTimeout(() => setVerdictVisible(true), 50);
-      });
-  }, [status, finalDownloadMbps, lookup]);
+  // To re-enable the AI verdict card: restore verdict/verdictLoading/verdictVisible state,
+  // verdictFetched ref, and uncomment this effect. Then render the verdict card JSX in the
+  // hero section (was below the refresh button).
+  //
+  // useEffect(() => {
+  //   if (status !== 'done' || finalDownloadMbps === null || lookup === null) return;
+  //   if (verdictFetched.current) return;
+  //   verdictFetched.current = true;
+  //   setVerdictLoading(true);
+  //   fetch('/api/verdict', {
+  //     method: 'POST',
+  //     headers: { 'Content-Type': 'application/json' },
+  //     body: JSON.stringify({ speed: Math.round(finalDownloadMbps), isp: lookup.isp }),
+  //   })
+  //     .then((res) => res.json())
+  //     .then((data: { verdict: string }) => {
+  //       setVerdict(data.verdict);
+  //       setVerdictLoading(false);
+  //       setTimeout(() => setVerdictVisible(true), 50);
+  //     })
+  //     .catch(() => {
+  //       setVerdict("Votre connexion a bien été testée. Pour naviguer en toute sécurité, pensez à utiliser un VPN afin de masquer votre adresse IP des regards indiscrets.");
+  //       setVerdictLoading(false);
+  //       setTimeout(() => setVerdictVisible(true), 50);
+  //     });
+  // }, [status, finalDownloadMbps, lookup]);
 
   // Fetch IP / ISP / location independently of the speed test — re-runs on refresh
   useEffect(() => {
@@ -150,11 +142,7 @@ export default function Home() {
     setFinalDownloadMbps(null);
     setStatus('running');
     setLookup(null);
-    setVerdict(null);
-    setVerdictLoading(false);
-    setVerdictVisible(false);
     isFinished.current = false;
-    verdictFetched.current = false;
     setRunKey((k) => k + 1);
   }
 
@@ -164,7 +152,7 @@ export default function Home() {
 
       {/* Branding header */}
       <header className="w-full flex justify-center pt-6 pb-2">
-        <span className="text-xs tracking-widest text-neutral-600 uppercase select-none">
+        <span className="text-xs tracking-widest text-neutral-300 uppercase select-none">
           Propulsé par INTERNET.FR
         </span>
       </header>
@@ -194,40 +182,15 @@ export default function Home() {
           )}
         </div>
 
-        {/* Refresh icon — disabled while test is running to prevent stacked concurrent runs */}
+        {/* Refresh icon — primary interactive element; disabled while test is running */}
         <button
           onClick={handleRestart}
           disabled={status === 'running'}
           aria-label="Relancer le test"
-          className="text-neutral-500 hover:text-[#22c55e] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:text-neutral-500"
+          className="mt-3 mb-3 text-neutral-500 hover:text-[#22c55e] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:text-neutral-500"
         >
           <RotateCw size={20} strokeWidth={1.5} />
         </button>
-
-        {/* "Voir plus d'infos" — opens info modal */}
-        <button
-          onClick={() => setInfoOpen(true)}
-          className="mt-1 px-6 py-2 rounded-full border border-neutral-700 text-sm text-neutral-400 hover:border-neutral-500 hover:text-neutral-200 transition-colors"
-        >
-          Voir plus d&apos;infos
-        </button>
-
-        {/* Verdict card — supporting detail, below the primary interactive elements */}
-        <div className="w-full rounded-2xl bg-[#1a1a1a] border border-[#2a2a2a] px-6 py-5 text-center shadow-xl mt-2">
-          {verdictLoading ? (
-            <p className="text-sm text-slate-500 font-light animate-pulse">
-              Analyse en cours…
-            </p>
-          ) : verdict !== null ? (
-            <p className={`text-sm text-neutral-300 font-light leading-relaxed transition-opacity duration-700 ${verdictVisible ? 'opacity-100' : 'opacity-0'}`}>
-              {verdict}
-            </p>
-          ) : (
-            <p className="text-sm text-slate-500 font-light">
-              Verdict will appear here.
-            </p>
-          )}
-        </div>
 
       </section>
 
@@ -264,13 +227,6 @@ export default function Home() {
           Cookies
         </button>
       </footer>
-
-      {/* "Voir plus d'infos" modal */}
-      <Modal isOpen={infoOpen} onClose={() => setInfoOpen(false)}>
-        <p className="text-sm text-neutral-300 font-light leading-relaxed">
-          De nouveaux outils et services exclusifs arrivent bientôt sur Internet.fr. Restez connectés&nbsp;!
-        </p>
-      </Modal>
 
       <CookieBanner
         externalSettingsOpen={cookieSettingsOpen}

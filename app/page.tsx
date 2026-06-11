@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useEffect, useRef, useState } from 'react';
-import { RotateCw } from 'lucide-react';
-import SpeedTest from '@cloudflare/speedtest';
-import Modal from '@/components/Modal';
-import CookieBanner from '@/components/CookieBanner';
+import { useEffect, useRef, useState } from "react";
+import { RotateCw } from "lucide-react";
+import SpeedTest from "@cloudflare/speedtest";
+import Modal from "@/components/Modal";
+import CookieBanner from "@/components/CookieBanner";
 
-type Status = 'running' | 'done';
+type Status = "running" | "done";
 
 interface LookupData {
-  ip:      string | null;
-  isp:     string | null;
-  city:    string | null;
+  ip: string | null;
+  isp: string | null;
+  city: string | null;
   country: string | null;
 }
 
@@ -22,9 +22,9 @@ function formatMbps(bps: number): string {
 
 export default function Home() {
   const [runKey, setRunKey] = useState(0);
-  const [displaySpeed, setDisplaySpeed] = useState<string>('0');
+  const [displaySpeed, setDisplaySpeed] = useState<string>("0");
   const [finalDownloadMbps, setFinalDownloadMbps] = useState<number | null>(null); // used by later phases
-  const [status, setStatus] = useState<Status>('running');
+  const [status, setStatus] = useState<Status>("running");
   const [lookup, setLookup] = useState<LookupData | null>(null); // null = still loading
   const [legalOpen, setLegalOpen] = useState(false);
   const [cookieSettingsOpen, setCookieSettingsOpen] = useState(false);
@@ -59,13 +59,13 @@ export default function Home() {
       // Large download counts trimmed. 250 MB tier dropped (auto-skipped on fast
       // connections anyway; adds 15+ s on slow ones).
       measurements: [
-        { type: 'latency',  numPackets: 1 },                              // ~20 ms
-        { type: 'download', bytes: 1e5, count: 1, bypassMinDuration: true }, // warmup
-        { type: 'download', bytes: 1e5, count: 3 },                       // was ×9
-        { type: 'download', bytes: 1e6, count: 4 },                       // was ×8
-        { type: 'download', bytes: 1e7, count: 4 },                       // was ×6 — ~1.2 s
-        { type: 'download', bytes: 25e6, count: 2 },                      // was ×4 — ~1.5 s
-        { type: 'download', bytes: 1e8,  count: 2 },                      // was ×3 — ~6 s
+        { type: "latency", numPackets: 1 }, // ~20 ms
+        { type: "download", bytes: 1e5, count: 1, bypassMinDuration: true }, // warmup
+        { type: "download", bytes: 1e5, count: 3 }, // was ×9
+        { type: "download", bytes: 1e6, count: 4 }, // was ×8
+        { type: "download", bytes: 1e7, count: 4 }, // was ×6 — ~1.2 s
+        { type: "download", bytes: 25e6, count: 2 }, // was ×4 — ~1.5 s
+        { type: "download", bytes: 1e8, count: 2 }, // was ×3 — ~6 s
       ],
     });
 
@@ -80,13 +80,15 @@ export default function Home() {
       const bps = results.getDownloadBandwidth();
       // Use 0 when no reading — maps to tres_lent tier so verdict still fires
       setFinalDownloadMbps(bps !== undefined ? bps / 1e6 : 0);
-      setDisplaySpeed(bps !== undefined ? formatMbps(bps) : '—');
-      setStatus('done');
+      setDisplaySpeed(bps !== undefined ? formatMbps(bps) : "—");
+      setStatus("done");
     };
 
     engine.play();
 
-    return () => { engine.pause(); };
+    return () => {
+      engine.pause();
+    };
   }, [runKey]);
 
   // To re-enable the AI verdict card: restore verdict/verdictLoading/verdictVisible state,
@@ -122,7 +124,7 @@ export default function Home() {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5_000);
 
-    fetch('/api/lookup', { signal: controller.signal })
+    fetch("/api/lookup", { signal: controller.signal })
       .then((res) => res.json())
       .then((data: LookupData) => {
         clearTimeout(timeout);
@@ -133,14 +135,17 @@ export default function Home() {
         if (!cancelled) setLookup({ ip: null, isp: null, city: null, country: null });
       });
 
-    return () => { cancelled = true; controller.abort(); };
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
   }, [runKey]);
 
   function handleRestart() {
     // Reset all state and refs before mounting a fresh SpeedTest instance
-    setDisplaySpeed('0');
+    setDisplaySpeed("0");
     setFinalDownloadMbps(null);
-    setStatus('running');
+    setStatus("running");
     setLookup(null);
     isFinished.current = false;
     setRunKey((k) => k + 1);
@@ -149,68 +154,55 @@ export default function Home() {
   return (
     // Slow connection accent: text-[#f87171] — apply to speed number and verdict card when speed is below threshold
     <main className="min-h-screen bg-[#0d0d0d] flex flex-col items-center px-4">
-
-      {/* Branding header */}
-      <header className="w-full flex justify-center pt-6 pb-2">
-        <span className="text-xs tracking-widest text-neutral-300 uppercase select-none">
+      {/* Single centered block — all hero content as one tight unit */}
+      <div className="flex-1 flex flex-col items-center justify-center w-full max-w-md">
+        {/* Header — single compact tagline */}
+        <span className="text-base md:text-lg tracking-widest text-[#22c55e] uppercase select-none font-light whitespace-nowrap">
           Propulsé par INTERNET.FR
         </span>
-      </header>
 
-      {/* Hero section — vertically centered, occupies remaining space */}
-      <section className="flex-1 flex flex-col items-center justify-center gap-5 w-full max-w-md py-8">
-
-        {/* Intro label */}
-        <p className="text-sm text-neutral-500 font-light tracking-wide">
+        {/* Intro — smaller than header to compensate for more characters; tracking-widest on header widens it */}
+        <p className="mt-2 text-xs md:text-sm text-white font-light tracking-wide text-center whitespace-nowrap">
           Votre vitesse de connexion est de
         </p>
 
-        {/* Speed number + Mbps top-right */}
-        <div className="flex items-start leading-none">
-          <span className="text-[7rem] sm:text-[9rem] font-bold tracking-tighter text-white select-none leading-none">
+        {/* Speed number — centered sole flex child so it sits on the page's vertical axis.
+            Mbps is absolute so it doesn't shift the number. Pulsing dot is absolute too —
+            zero layout footprint, disappears when the test finishes. */}
+        <div className="mt-2 flex justify-center">
+          <span className="relative text-[7rem] sm:text-[9rem] font-bold tracking-tighter text-white select-none leading-none whitespace-nowrap">
             {displaySpeed}
-          </span>
-          <span className="text-lg sm:text-xl font-semibold text-[#22c55e] pt-3 sm:pt-4 pl-2 leading-none">
-            Mbps
+            <span className="absolute top-3 sm:top-4 left-full pl-3 text-lg sm:text-xl font-semibold text-[#22c55e] leading-none whitespace-nowrap tracking-normal">
+              Mbps
+            </span>
+            {status === 'running' && (
+              <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse" />
+            )}
           </span>
         </div>
 
-        {/* Pulsing dot — visible only while test is running */}
-        <div className="h-3 flex items-center justify-center">
-          {status === 'running' && (
-            <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse" />
-          )}
+        {/* IP / ISP / Location — equidistant between speed number and refresh icon (mt-8 on each side) */}
+        <div className="mt-8 flex flex-wrap justify-center gap-x-4 gap-y-1">
+          <span className="text-sm text-white">IP: {lookup?.ip ?? '—'}</span>
+          <span className="text-sm text-white">ISP: {lookup?.isp ?? '—'}</span>
+          <span className="text-sm text-white">
+            Location: {lookup ? [lookup.city, lookup.country].filter(Boolean).join(', ') || '—' : '—'}
+          </span>
         </div>
 
-        {/* Refresh icon — primary interactive element; disabled while test is running */}
+        {/* Refresh icon — mt-8 below IP block, equal to the spacing above it */}
         <button
           onClick={handleRestart}
           disabled={status === 'running'}
           aria-label="Relancer le test"
-          className="mt-3 mb-3 text-neutral-500 hover:text-[#22c55e] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:text-neutral-500"
+          className="mt-8 text-[#22c55e] hover:text-[#16a34a] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:text-[#22c55e]"
         >
           <RotateCw size={20} strokeWidth={1.5} />
         </button>
-
-      </section>
-
-      {/* IP / ISP / Location — discreet, just above the footer */}
-      <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 pb-4">
-        <span className="text-xs text-neutral-600">
-          IP: {lookup?.ip ?? '—'}
-        </span>
-        <span className="text-xs text-neutral-600">
-          ISP: {lookup?.isp ?? '—'}
-        </span>
-        <span className="text-xs text-neutral-600">
-          Location: {lookup
-            ? ([lookup.city, lookup.country].filter(Boolean).join(', ') || '—')
-            : '—'}
-        </span>
       </div>
 
       {/* Footer */}
-      <footer className="w-full flex justify-center items-center gap-1 pb-6 text-xs text-neutral-600">
+      <footer className="w-full flex justify-center items-center gap-1 pb-6 text-sm text-white">
         <span>Propulsé par Internet.fr</span>
         <span className="mx-1">|</span>
         <button
@@ -236,7 +228,6 @@ export default function Home() {
       {/* Legal / RGPD modal */}
       <Modal isOpen={legalOpen} onClose={() => setLegalOpen(false)}>
         <div className="space-y-4 text-sm">
-
           <h2 className="text-base font-semibold text-neutral-100 tracking-wide">
             Mentions Légales &amp; Politique de Confidentialité (RGPD)
           </h2>
@@ -244,15 +235,13 @@ export default function Home() {
           <section>
             <h3 className="font-semibold text-neutral-200 mb-1">1. Éditeur du site</h3>
             <p className="text-neutral-400 font-light leading-relaxed">
-              Le site Internet.fr est édité par la société de Monsieur Xavier Thine, immatriculée au Registre du Commerce
-              et des Sociétés (RCS) de Bayonne sous le numéro 928 248 517.
+              Le site Internet.fr est édité par la société de Monsieur Xavier Thine, immatriculée au Registre du
+              Commerce et des Sociétés (RCS) de Bayonne sous le numéro 928 248 517.
             </p>
             <p className="text-neutral-400 font-light leading-relaxed mt-1">
               Siège social : 1 allée des Jardins d&apos;Arcadie, 64600 Anglet, France.
             </p>
-            <p className="text-neutral-400 font-light leading-relaxed mt-1">
-              Représentant légal : Xavier Thine
-            </p>
+            <p className="text-neutral-400 font-light leading-relaxed mt-1">Représentant légal : Xavier Thine</p>
           </section>
 
           <section>
@@ -273,14 +262,16 @@ export default function Home() {
           </section>
 
           <section>
-            <h3 className="font-semibold text-neutral-200 mb-1">4. Protection des données personnelles (RGPD) &amp; Cookies</h3>
+            <h3 className="font-semibold text-neutral-200 mb-1">
+              4. Protection des données personnelles (RGPD) &amp; Cookies
+            </h3>
             <p className="text-neutral-400 font-light leading-relaxed">
               Le site Internet.fr respecte la vie privée de ses utilisateurs.
             </p>
             <p className="text-neutral-400 font-light leading-relaxed mt-2">
-              <span className="text-neutral-300 font-normal">Données collectées :</span> Dans le cadre de l&apos;exécution
-              du test, le site traite de manière temporaire votre adresse IP pour interagir avec l&apos;infrastructure de
-              test (Upstash Redis). Aucune donnée nominative n&apos;est collectée.
+              <span className="text-neutral-300 font-normal">Données collectées :</span> Dans le cadre de
+              l&apos;exécution du test, le site traite de manière temporaire votre adresse IP pour interagir avec
+              l&apos;infrastructure de test (Upstash Redis). Aucune donnée nominative n&apos;est collectée.
             </p>
             <p className="text-neutral-400 font-light leading-relaxed mt-2">
               <span className="text-neutral-300 font-normal">Droit des utilisateurs :</span> Conformément au règlement
@@ -293,10 +284,8 @@ export default function Home() {
               pour gérer vos préférences.
             </p>
           </section>
-
         </div>
       </Modal>
-
     </main>
   );
 }
